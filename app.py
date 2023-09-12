@@ -5,6 +5,7 @@ import requests
 from flask_cors import CORS
 import sqlite3 as sql # sql lite module
 # create the Flask app and configure the app to allows access to our endpoints from any ip-address using CORS
+# https://flask-cors.readthedocs.io/en/latest/
 
 
 app = Flask(__name__)
