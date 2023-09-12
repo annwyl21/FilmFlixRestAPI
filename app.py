@@ -2,7 +2,6 @@
 
 from flask import Flask, request, jsonify
 import requests
-from show_all_records import get_films_as_dict
 from flask_cors import CORS
 import sqlite3 as sql # sql lite module
 # create the Flask app and configure the app to allows access to our endpoints from any ip-address using CORS
