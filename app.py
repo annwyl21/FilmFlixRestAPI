@@ -15,14 +15,10 @@ CORS(app)
 def api_get_films():
 	dbcon = sql.connect("filmflix.db")
 	dbCursor = dbcon.cursor()
-		
-	film_collection = []
-
-	#dbcon.row_factory = sql.Row
 	dbCursor.execute('SELECT * FROM tblfilms')
 	rows = dbCursor.fetchall()
-	#print(rows)
-
+		
+	film_collection = []
 	# convert row objects to dictionary
 	for film_data_tuple in rows:
 		#print(film_data_tuple)
