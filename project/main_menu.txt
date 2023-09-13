@@ -1,9 +1,0 @@
-Welcome to FILM FLIX DATABASE
-
-Select:
-	(O)ptions Menu
-		- Add, Amend or Delete a film
-	(R)eports Menu
-		- Select films
-	
-E(X)it

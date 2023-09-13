@@ -1,9 +1,0 @@
-FILM FLIX DATABASE CRUD
-
-Options Menu:
-(P)rint all films
-(A)dd a film
-(U)pdate a film
-(D)elete a film
-
-(R)eturn to Main Menu

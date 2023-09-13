@@ -1,9 +1,0 @@
-FILM FLIX DATABASE REPORTS
-
-Reports Available:
-1. Print details of all films
-2. Print all films of a particular genre
-3. Print all films made in a specific year
-4. Print all films with a particular rating
-
-5. Return to Main Menu
