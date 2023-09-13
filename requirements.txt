@@ -5,3 +5,4 @@ jsonify
 pandas
 numpy
 matplotlib
+gunicorn
