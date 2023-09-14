@@ -32,7 +32,7 @@ def api_get_films():
 	
 	return jsonify(film_collection)
 
-@app.route('api/add', methods=['POST'])
+@app.route('/api/add', methods=['POST'])
 def api_add_film():
 	if request.method == 'POST':
 		title = request.args.get('title')
