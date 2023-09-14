@@ -63,6 +63,20 @@ def api_remove_film(film_id):
 		logger.info(f'Film Deleted Successfully: Film ID {film_id}')
 		return jsonify({'removed': film_id})
 
+@app.route('/api/amend', methods=['PATCH'])
+def api_amend_film():
+	if request.method == 'PATCH':
+		film_id = request.form.get('film_id')
+		fieldname = request.form.get('fieldname')
+		fieldvalue = request.form.get('fieldvalue')
+		update = {'Film ID': film_id, 'Field To Update': fieldname, 'Value': fieldvalue}
+
+		dbcon = sql.connect("filmflix.db")
+		dbCursor = dbcon.cursor()
+		dbCursor.execute(f"UPDATE tblfilms SET {fieldname} = '{fieldvalue}' WHERE filmId = {film_id}")
+		dbcon.commit()
+		logger.info(f"Record Updated: {film_id} {fieldname} updated to {fieldvalue}")
+		return jsonify(update)
 
 if __name__ == '__main__':
 	app.debug = True
