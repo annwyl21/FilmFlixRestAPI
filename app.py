@@ -5,7 +5,10 @@ from flask_cors import CORS
 import sqlite3 as sql # sql lite module
 # create the Flask app and configure the app to allows access to our endpoints from any ip-address using CORS
 # https://flask-cors.readthedocs.io/en/latest/
-
+import logging
+LOG_FORMAT = "%(levelname)s %(asctime)s - %(message)s"
+logging.basicConfig(filename = "log_CRUD.log", level=logging.INFO, format = LOG_FORMAT)
+logger = logging.getLogger()
 
 app = Flask(__name__)
 CORS(app)
@@ -35,17 +38,31 @@ def api_get_films():
 @app.route('/api/add', methods=['POST'])
 def api_add_film():
 	if request.method == 'POST':
-		title = request.args.get('title')
-		year_released = request.args.get('year_released')
-		rating = request.args.get('rating')
-		duration = request.args.get('duration')
-		genre = request.args.get('genre')
+		title = request.form.get('title')
+		year_released = request.form.get('year_released')
+		rating = request.form.get('rating')
+		duration = request.form.get('duration')
+		genre = request.form.get('genre')
+		film_data = {'title': title, 'year_released': year_released, 'rating': rating, 'duration': duration, 'genre': genre}
 		
 		dbcon = sql.connect("filmflix.db")
 		dbCursor = dbcon.cursor()
 		dbCursor.execute("INSERT INTO tblfilms(title, yearReleased, rating, duration, genre) VALUES(?, ?, ?, ?, ?)", (title, year_released, rating, duration, genre))
 		dbcon.commit()
-		return jsonify({'test': 'test'})
+
+		logger.info(f'Film Added Successfully: Title {title}')
+		return jsonify(film_data)
+
+@app.route('/api/remove/<film_id>', methods=['DELETE'])
+def api_remove_film(film_id):
+	if request.method == 'DELETE':
+		dbcon = sql.connect("filmflix.db")
+		dbCursor = dbcon.cursor()
+		dbCursor.execute(f"DELETE FROM tblfilms where filmID = {film_id}")
+		dbcon.commit()
+		logger.info(f'Film Deleted Successfully: Film ID {film_id}')
+		return jsonify({'removed': film_id})
+
 
 if __name__ == '__main__':
 	app.debug = True
