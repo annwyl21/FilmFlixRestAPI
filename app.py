@@ -38,11 +38,12 @@ def api_get_films():
 @app.route('/api/add', methods=['POST'])
 def api_add_film():
 	if request.method == 'POST':
-		title = request.form.get('title')
-		year_released = request.form.get('year_released')
-		rating = request.form.get('rating')
-		duration = request.form.get('duration')
-		genre = request.form.get('genre')
+		data = request.json
+		title = data.get('title')
+		year_released = data.get('year_released')
+		rating = data.get('rating')
+		duration = data.get('duration')
+		genre = data.get('genre')
 		film_data = {'title': title, 'year_released': year_released, 'rating': rating, 'duration': duration, 'genre': genre}
 		
 		dbcon = sql.connect("filmflix.db")
@@ -66,9 +67,10 @@ def api_remove_film(film_id):
 @app.route('/api/amend', methods=['PATCH'])
 def api_amend_film():
 	if request.method == 'PATCH':
-		film_id = request.form.get('film_id')
-		fieldname = request.form.get('fieldname')
-		fieldvalue = request.form.get('fieldvalue')
+		data = request.json
+		film_id = data.get('film_id')
+		fieldname = data.get('fieldname')
+		fieldvalue = data.get('fieldvalue')
 		update = {'Film ID': film_id, 'Field To Update': fieldname, 'Value': fieldvalue}
 
 		dbcon = sql.connect("filmflix.db")
