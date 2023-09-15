@@ -18,8 +18,8 @@ I extended this project by building a RestAPI.
 	- connects to the given FilmFlix database initially containing 37 films
 
 I further extended this project by building 2 connections to my API
-1 A [jupyter notebook]() which uses the json to generate basic statistics
+1 A [jupyter notebook](https://github.com/annwyl21/FilmFlixRestAPI/blob/main/database_statistics.ipynb) which uses the json to generate basic statistics
 	- the json is put into a pandas dataframe
 	- matplotlib is used to generate statistics
-2 A basic [flask app]() which can be used to carry out CRUD operations
---I have better examples of Flask App UI's, this is purely to focus on demonstrating my knowledge of back-end operations.--
+2 A basic [flask app](https://github.com/annwyl21/FilmFlixUI) which can be used to carry out CRUD operations
+*I have better examples of Flask App UI's, this is purely to focus on demonstrating my knowledge of back-end operations.*
