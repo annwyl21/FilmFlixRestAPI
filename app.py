@@ -7,7 +7,7 @@ import sqlite3 as sql # sql lite module
 # https://flask-cors.readthedocs.io/en/latest/
 import logging
 LOG_FORMAT = "%(levelname)s %(asctime)s - %(message)s"
-logging.basicConfig(filename = "log_CRUD.log", level=logging.INFO, format = LOG_FORMAT)
+logging.basicConfig(filename = "log_CRUD.log", level=logging.critical, format = LOG_FORMAT)
 logger = logging.getLogger()
 
 app = Flask(__name__)
@@ -81,6 +81,4 @@ def api_amend_film():
 		return jsonify(update)
 
 if __name__ == '__main__':
-	app.debug = True
-	app.run(debug=True)
 	app.run()
