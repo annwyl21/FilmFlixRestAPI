@@ -17,9 +17,12 @@ I extended this project by building a RestAPI.
 	- has no front end UI
 	- connects to the given FilmFlix database initially containing 37 films
 
-I further extended this project by building 2 connections to my API
+I further extended this project by building 2 connections to my API.
+
 1 A [jupyter notebook](https://github.com/annwyl21/FilmFlixRestAPI/blob/main/database_statistics.ipynb) which uses the json to generate basic statistics
 	- the json is put into a pandas dataframe
 	- matplotlib is used to generate statistics
-2 A basic [flask app](https://github.com/annwyl21/FilmFlixUI) which can be used to carry out CRUD operations
+ 
+2 A basic [flask app available on render](https://filmflixui.onrender.com/) which can be used to carry out CRUD operations
+
 *I have better examples of Flask App UI's, this is purely to focus on demonstrating my knowledge of back-end operations.*
