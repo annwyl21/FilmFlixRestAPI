@@ -15,6 +15,9 @@ I extended this project by building a python microservice that provides endpoint
 	- My microservice can communicate with any client using json via its POST, PATCH, DELETE endpoints.
 
 I further extended this project by building 2 example clients; a jupyter notebook using Matplotlib to graph the database data and a flask app to provide a web GUI for the CRUD operations.
-1 A [jupyter notebook](https://github.com/annwyl21/FilmFlixRestAPI/blob/main/database_statistics.ipynb)
-2 A web GUI [flask app](https://github.com/annwyl21/FilmFlixUI)
+
+	1 A [jupyter notebook](https://github.com/annwyl21/FilmFlixRestAPI/blob/main/database_statistics.ipynb)
+	2 A web GUI [flask app](https://github.com/annwyl21/FilmFlixUI)
+	
 *I have better examples of Flask App UI's, this is purely to focus on demonstrating my knowledge of back-end operations.*
+
