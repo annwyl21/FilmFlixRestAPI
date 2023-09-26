@@ -2,14 +2,18 @@
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+
 import sqlite3 as sql # sql lite module
-# create the Flask app and configure the app to allows access to our endpoints from any ip-address using CORS
-# https://flask-cors.readthedocs.io/en/latest/
+
+from user_data_check import UserDataCheck
+
 import logging
 LOG_FORMAT = "%(levelname)s %(asctime)s - %(message)s"
 logging.basicConfig(filename = "log_CRUD.log", level=logging.ERROR, format = LOG_FORMAT)
 logger = logging.getLogger()
 
+# create the Flask app and configure the app to allows access to our endpoints from any ip-address using CORS
+# https://flask-cors.readthedocs.io/en/latest/
 app = Flask(__name__)
 CORS(app)
 
@@ -17,23 +21,29 @@ CORS(app)
 def api_get_films():
 	dbcon = sql.connect("filmflix.db")
 	dbCursor = dbcon.cursor()
-	dbCursor.execute('SELECT * FROM tblfilms')
-	rows = dbCursor.fetchall()
+
+	try:
+		dbCursor.execute('SELECT * FROM tblfilms')
+		rows = dbCursor.fetchall()
+			
+		film_collection = []
+		# convert row objects to dictionary
+		for film_data_tuple in rows:
+			#print(film_data_tuple)
+			film = {}
+			film['id'] = film_data_tuple[0]
+			film['title'] = film_data_tuple[1]
+			film['year_released'] = film_data_tuple[2]
+			film['rating'] = film_data_tuple[3]
+			film['duration'] = film_data_tuple[4]
+			film['genre'] = film_data_tuple[5]
+			film_collection.append(film)
 		
-	film_collection = []
-	# convert row objects to dictionary
-	for film_data_tuple in rows:
-		#print(film_data_tuple)
-		film = {}
-		film['id'] = film_data_tuple[0]
-		film['title'] = film_data_tuple[1]
-		film['year_released'] = film_data_tuple[2]
-		film['rating'] = film_data_tuple[3]
-		film['duration'] = film_data_tuple[4]
-		film['genre'] = film_data_tuple[5]
-		film_collection.append(film)
+		return jsonify(film_collection)
 	
-	return jsonify(film_collection)
+	except sql.DatabaseError as e:
+		logger.error("DELETE FAILED: Database Error on DELETE attempt")
+		return jsonify({'error': 'Database Error'})
 
 @app.route('/api/add', methods=['POST'])
 def api_add_film():
@@ -54,15 +64,35 @@ def api_add_film():
 		logger.info(f'Film Added Successfully: Title {title}')
 		return jsonify(film_data)
 
-@app.route('/api/remove/<film_id>', methods=['DELETE'])
-def api_remove_film(film_id):
+@app.route('/api/remove/<user_entry>', methods=['DELETE'])
+def api_remove_film(user_entry):
 	if request.method == 'DELETE':
 		dbcon = sql.connect("filmflix.db")
 		dbCursor = dbcon.cursor()
-		dbCursor.execute(f"DELETE FROM tblfilms where filmID = {film_id}")
-		dbcon.commit()
-		logger.info(f'Film Deleted Successfully: Film ID {film_id}')
-		return jsonify({'removed': film_id})
+
+		film_id = UserDataCheck.film_id(user_entry)
+		if film_id == 'error':
+			return jsonify({'error': 'Film ID invalid'})
+		
+		else:
+			dbCursor.execute(f"SELECT * FROM tblfilms WHERE filmID = {film_id}")
+			film_result = dbCursor.fetchone()
+
+			if film_result:
+
+				try:
+					dbCursor.execute(f"DELETE FROM tblfilms where filmID = {film_id}")
+					dbcon.commit()
+					logger.info(f'Film Deleted Successfully: Film ID {film_id}')
+					return jsonify({'removed': film_id})
+				
+				except sql.DatabaseError as e:
+					logger.error("DELETE FAILED: Database Error on DELETE attempt")
+					return jsonify({'error': 'Database Error'})
+			
+			else:
+				return jsonify({'error': 'Film ID invalid'})
+
 
 @app.route('/api/amend', methods=['PATCH'])
 def api_amend_film():
