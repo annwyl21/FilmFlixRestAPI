@@ -70,7 +70,7 @@ def api_remove_film(user_entry):
 		dbcon = sql.connect("filmflix.db")
 		dbCursor = dbcon.cursor()
 
-		film_id = UserDataCheck.film_id(user_entry)
+		film_id = UserDataCheck.check_film_id(user_entry)
 		if film_id == 'error':
 			return jsonify({'error': 'Film ID invalid'})
 		
