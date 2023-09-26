@@ -12,6 +12,12 @@ I further extended this project by building 2 example clients; a jupyter noteboo
 1. [Jupyter Notebook](https://github.com/annwyl21/FilmFlixRestAPI/blob/main/database_statistics.ipynb)
 
 2. [Web GUI Flask App](https://github.com/annwyl21/FilmFlixUI)
+
+3. Logging
+
+4. Testing Pytest
+
+5. CI/CD GitHub Actions
 	
 *I have better examples of Flask App UI's, this is purely to focus on demonstrating my knowledge of back-end operations.*
 
