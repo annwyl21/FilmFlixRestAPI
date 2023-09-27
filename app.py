@@ -2,6 +2,7 @@
 
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from datetime import datetime
 
 import sqlite3 as sql # sql lite module
 
@@ -11,6 +12,9 @@ import logging
 LOG_FORMAT = "%(levelname)s %(asctime)s - %(message)s"
 logging.basicConfig(filename = "log_CRUD.log", level=logging.ERROR, format = LOG_FORMAT)
 logger = logging.getLogger()
+
+current_time = datetime.now()
+formatted_time = current_time.strftime('%Y-%m-%d %H:%M')
 
 # create the Flask app and configure the app to allows access to our endpoints from any ip-address using CORS
 # https://flask-cors.readthedocs.io/en/latest/
@@ -53,7 +57,8 @@ def api_check_film():
 
 		title_to_check = UserDataCheck.check_word(user_entry)
 		if title_to_check == 'error':
-			return jsonify({'error': 'Film ID invalid'})
+			logger.warning(f"User Input Error: {user_entry}")
+			return jsonify({'error': f'Word Invalid, Warning Logged {formatted_time}'})
 		
 		else:
 
@@ -62,9 +67,11 @@ def api_check_film():
 			dbCursor.execute(f"SELECT * FROM tblfilms WHERE title LIKE '%{title_to_check.lower()}%'")
 			all_records = dbCursor.fetchall()
 			if not all_records:
+				logger.info(f'Film Search: Title not found')
 				return jsonify({'not found': 'Title not found in database'})
 			else:
 				for film in all_records:
+					logger.info(f'Film Search: Title found')
 					return jsonify({'film found': film})
 
 
@@ -72,19 +79,20 @@ def api_check_film():
 def api_add_film():
 	if request.method == 'POST':
 		data = request.json
-		title = data.get('title')
-		year_released = data.get('year_released')
-		rating = data.get('rating')
-		duration = data.get('duration')
-		genre = data.get('genre')
-		film_data = {'title': title, 'year_released': year_released, 'rating': rating, 'duration': duration, 'genre': genre}
+		film_data = UserDataCheck.check_data_to_add(data)
+		# title = data.get('title')
+		# year_released = data.get('year_released')
+		# rating = data.get('rating')
+		# duration = data.get('duration')
+		# genre = data.get('genre')
+		# film_data = {'title': title, 'year_released': year_released, 'rating': rating, 'duration': duration, 'genre': genre}
 		
 		dbcon = sql.connect("filmflix.db")
 		dbCursor = dbcon.cursor()
-		dbCursor.execute("INSERT INTO tblfilms(title, yearReleased, rating, duration, genre) VALUES(?, ?, ?, ?, ?)", (title, year_released, rating, duration, genre))
+		dbCursor.execute("INSERT INTO tblfilms(title, yearReleased, rating, duration, genre) VALUES(?, ?, ?, ?, ?)", (film_data['title'], year_released, rating, duration, genre))
 		dbcon.commit()
 
-		logger.info(f'Film Added Successfully: Title {title}')
+		logger.info(f"Film Added Successfully: Title {film_data['title']}")
 		return jsonify(film_data)
 
 @app.route('/api/remove/<user_entry>', methods=['DELETE'])
@@ -95,7 +103,8 @@ def api_remove_film(user_entry):
 
 		film_id = UserDataCheck.check_film_id(user_entry)
 		if film_id == 'error':
-			return jsonify({'error': 'Film ID invalid'})
+			logger.warning(f"User Input Error: {user_entry}")
+			return jsonify({'error': f'Film ID {user_entry} invalid, See Warning Log {formatted_time}'})
 		
 		else:
 			dbCursor.execute(f"SELECT * FROM tblfilms WHERE filmID = {film_id}")
@@ -107,14 +116,15 @@ def api_remove_film(user_entry):
 					dbCursor.execute(f"DELETE FROM tblfilms where filmID = {film_id}")
 					dbcon.commit()
 					logger.info(f'Film Deleted Successfully: Film ID {film_id}')
-					return jsonify({'removed': film_id})
+					return jsonify({'removed': f"{film_id} {formatted_time}"})
 				
 				except sql.DatabaseError as e:
 					logger.error("DELETE FAILED: Database Error on DELETE attempt")
-					return jsonify({'error': 'Database Error'})
+					return jsonify({'error': f'Database Error, See Error Log {formatted_time}'})
 			
 			else:
-				return jsonify({'error': 'Film ID invalid'})
+				logger.warning(f"User Input Error: {user_entry}, Failed Attempt to delete film")
+				return jsonify({'error': f'Film ID {film_id} invalid, See Warning Log {formatted_time}'})
 
 
 @app.route('/api/amend', methods=['PATCH'])

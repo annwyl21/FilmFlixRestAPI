@@ -16,3 +16,30 @@ class UserDataCheck:
 		else:
 			return 'error'
 		
+	@staticmethod
+	def check_title(title):
+		words_in_title = title.split()
+		for word in words_in_title:
+			word = word.lower()
+			if not word.isalnum():# allow colon as punctuation only
+				for letter in word:
+					if letter not in range(48, 58) or letter not in range(65, 90):
+						return 'error'	
+			else:
+				return title
+
+
+	# check year released
+	# check rating
+	# check duration
+	# check genre
+		
+	@staticmethod
+	def check_data_to_add(data):
+		title = UserDataCheck.check_word(data.get('title'))
+		year_released = data.get('year_released')
+		rating = data.get('rating')
+		duration = data.get('duration')
+		genre = data.get('genre')
+		return {'title': title, 'year_released': year_released, 'rating': rating, 'duration': duration, 'genre': genre}
+		
