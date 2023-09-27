@@ -21,13 +21,11 @@ class UserDataCheck:
 		words_in_title = title.split()
 		for word in words_in_title:
 			word = word.lower()
-			if not word.isalnum():# allow colon as punctuation only
-				for letter in word:
-					if letter not in range(48, 58) or letter not in range(65, 90):
-						return 'error'	
-			else:
-				return title
-
+			# allow colon as punctuation only
+			for letter in word:
+				if not (letter.islower() or letter.isdigit() or letter == ':'):
+					return 'error'
+		return title
 
 	# check year released
 	# check rating
@@ -42,4 +40,8 @@ class UserDataCheck:
 		duration = data.get('duration')
 		genre = data.get('genre')
 		return {'title': title, 'year_released': year_released, 'rating': rating, 'duration': duration, 'genre': genre}
+	
+
+if __name__ == '__main__':
+	print(UserDataCheck.check_title('The Lost City'))
 		

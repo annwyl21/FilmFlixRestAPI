@@ -38,6 +38,6 @@ def test_word_check(word, answer):
 	("<h1>hello</h1>", "error") # markup insertion
 ])
 def test_check_title(title, answer):
-	results = UserDataCheck.check_word(title)
+	results = UserDataCheck.check_title(title)
 	assert results == answer, f"title check failed {title}"
 	
