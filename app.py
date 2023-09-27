@@ -45,6 +45,29 @@ def api_get_films():
 		logger.error("DELETE FAILED: Database Error on DELETE attempt")
 		return jsonify({'error': 'Database Error'})
 
+@app.route('/api/check', methods=['POST'])
+def api_check_film():
+	if request.method == 'POST':
+		data = request.json
+		user_entry = data.get('word')
+
+		title_to_check = UserDataCheck.check_word(user_entry)
+		if title_to_check == 'error':
+			return jsonify({'error': 'Film ID invalid'})
+		
+		else:
+
+			dbcon = sql.connect("filmflix.db")
+			dbCursor = dbcon.cursor()
+			dbCursor.execute(f"SELECT * FROM tblfilms WHERE title LIKE '%{title_to_check.lower()}%'")
+			all_records = dbCursor.fetchall()
+			if not all_records:
+				return jsonify({'not found': 'Title not found in database'})
+			else:
+				for film in all_records:
+					return jsonify({'film found': film})
+
+
 @app.route('/api/add', methods=['POST'])
 def api_add_film():
 	if request.method == 'POST':

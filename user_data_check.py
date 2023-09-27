@@ -7,4 +7,12 @@ class UserDataCheck:
 			return film_id
 		else:
 			return 'error'
+	
+	@staticmethod
+	def check_word(word):
+		#check word only contains letters or numbers and no punctuation
+		if word.isalnum():
+			return word
+		else:
+			return 'error'
 		
