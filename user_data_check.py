@@ -63,7 +63,3 @@ class UserDataCheck:
 		genre = data.get('genre')
 		return {'title': title, 'year_released': year_released, 'rating': rating, 'duration': duration, 'genre': genre}
 	
-
-if __name__ == '__main__':
-	print(UserDataCheck.check_title('The Lost City'))
-		

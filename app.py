@@ -79,17 +79,17 @@ def api_check_film():
 def api_add_film():
 	if request.method == 'POST':
 		data = request.json
-		#film_data = UserDataCheck.check_data_to_add(data)
-		title = data.get('title')
-		year_released = data.get('year_released')
-		rating = data.get('rating')
-		duration = data.get('duration')
-		genre = data.get('genre')
-		film_data = {'title': title, 'year_released': year_released, 'rating': rating, 'duration': duration, 'genre': genre}
+		film_data = UserDataCheck.check_data_to_add(data)
+		# title = data.get('title')
+		# year_released = data.get('year_released')
+		# rating = data.get('rating')
+		# duration = data.get('duration')
+		# genre = data.get('genre')
+		# film_data = {'title': title, 'year_released': year_released, 'rating': rating, 'duration': duration, 'genre': genre}
 		
 		dbcon = sql.connect("filmflix.db")
 		dbCursor = dbcon.cursor()
-		dbCursor.execute("INSERT INTO tblfilms(title, yearReleased, rating, duration, genre) VALUES(?, ?, ?, ?, ?)", (film_data['title'], year_released, rating, duration, genre))
+		dbCursor.execute("INSERT INTO tblfilms(title, yearReleased, rating, duration, genre) VALUES(?, ?, ?, ?, ?)", (film_data['title'], film_data['year_released'], film_data['rating'], film_data['duration'], film_data['genre']))
 		dbcon.commit()
 
 		logger.info(f"Film Added Successfully: Title {film_data['title']}")
