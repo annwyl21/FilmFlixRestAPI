@@ -40,4 +40,16 @@ def test_word_check(word, answer):
 def test_check_title(title, answer):
 	results = UserDataCheck.check_title(title)
 	assert results == answer, f"title check failed {title}"
+
+@pytest.mark.parametrize("year, answer", [
+	("2023", "2023"), #String acceptable
+	# Invalid
+	("1850", "error"), # date too old
+	("; DROP DATABASE; --", "error"), #SQL injection
+	(" OR 1=1 --", "error"), # SQL injection
+	("<h1>hello</h1>", "error") # markup insertion
+])
+def test_check_year(year, answer):
+	results = UserDataCheck.check_year(year)
+	assert results == answer, f"year check failed {year}, {results}"
 	

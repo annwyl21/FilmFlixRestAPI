@@ -1,3 +1,7 @@
+import datetime
+
+today = datetime.date.today()
+
 class UserDataCheck:
 
 	@staticmethod # self is not needed with a static method, no instantiation is required to use a static method
@@ -26,8 +30,18 @@ class UserDataCheck:
 				if not (letter.islower() or letter.isdigit() or letter == ':'):
 					return 'error'
 		return title
+	
+	@staticmethod
+	def check_year(year):
+		try:
+			if int(year) >= 1888 and int(year) <= today.year:
+				return year
+			else:
+				return 'error'
+		except ValueError as e:
+			return 'error'
 
-	# check year released
+
 	# check rating
 	# check duration
 	# check genre
@@ -35,7 +49,7 @@ class UserDataCheck:
 	@staticmethod
 	def check_data_to_add(data):
 		title = UserDataCheck.check_word(data.get('title'))
-		year_released = data.get('year_released')
+		year_released = UserDataCheck.check_year(data.get('year_released'))
 		rating = data.get('rating')
 		duration = data.get('duration')
 		genre = data.get('genre')
