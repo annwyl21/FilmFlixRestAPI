@@ -40,10 +40,18 @@ class UserDataCheck:
 				return 'error'
 		except ValueError as e:
 			return 'error'
-
+	
+	@staticmethod
+	def check_duration(duration):
+		try:
+			if int(duration) > 1 and int(duration) < 874:
+				return duration
+			else:
+				return 'error'
+		except ValueError as e:
+			return 'error'
 
 	# check rating
-	# check duration
 	# check genre
 		
 	@staticmethod
@@ -51,7 +59,7 @@ class UserDataCheck:
 		title = UserDataCheck.check_word(data.get('title'))
 		year_released = UserDataCheck.check_year(data.get('year_released'))
 		rating = data.get('rating')
-		duration = data.get('duration')
+		duration = UserDataCheck.check_duration(data.get('duration'))
 		genre = data.get('genre')
 		return {'title': title, 'year_released': year_released, 'rating': rating, 'duration': duration, 'genre': genre}
 	

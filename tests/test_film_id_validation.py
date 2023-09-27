@@ -45,6 +45,7 @@ def test_check_title(title, answer):
 	("2023", "2023"), #String acceptable
 	# Invalid
 	("1850", "error"), # date too old
+	#("25", 'error') # user must enter century
 	("; DROP DATABASE; --", "error"), #SQL injection
 	(" OR 1=1 --", "error"), # SQL injection
 	("<h1>hello</h1>", "error") # markup insertion
@@ -52,4 +53,17 @@ def test_check_title(title, answer):
 def test_check_year(year, answer):
 	results = UserDataCheck.check_year(year)
 	assert results == answer, f"year check failed {year}, {results}"
-	
+
+@pytest.mark.parametrize("duration, answer", [
+	("120", "120"), #String acceptable
+	# Invalid
+	("873", "873"), # edge case, longest movie
+	#("1.20")
+	#("1h20m")
+	("; DROP DATABASE; --", "error"), #SQL injection
+	(" OR 1=1 --", "error"), # SQL injection
+	("<h1>hello</h1>", "error") # markup insertion
+])
+def test_check_duration(duration, answer):
+	results = UserDataCheck.check_duration(duration)
+	assert results == answer, f"duration check failed {duration}, {results}"
