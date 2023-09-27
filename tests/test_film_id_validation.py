@@ -9,6 +9,10 @@ from user_data_check import UserDataCheck
 	#("4.5", "error"), # not a valid number
 ])
 def test_film_id(film_id, answer):
-	MrsTester = UserDataCheck()
-	results = MrsTester.check_film_id(film_id)
-	assert results == answer, f"film_id check not working"
+	results = UserDataCheck.check_film_id(film_id)
+	assert results == answer, f"film_id check not working {answer}"
+
+def test_id():
+	film_id = "42"
+	results = UserDataCheck.check_film_id(film_id)
+	assert results == "42", f"film_id check not working {film_id}"
