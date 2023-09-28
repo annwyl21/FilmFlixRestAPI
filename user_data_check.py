@@ -54,6 +54,7 @@ class UserDataCheck:
 		
 	@staticmethod
 	def check_rating(rating, available_ratings):
+		print(rating, available_ratings)
 		rating = rating.upper()
 		# list contains standardised ratings used in the database
 		if rating in available_ratings:
@@ -64,10 +65,10 @@ class UserDataCheck:
 		
 	@staticmethod
 	def check_data_to_add(data, available_selections):
-		title = UserDataCheck.check_title(data.get('title'))
-		year_released = UserDataCheck.check_year(data.get('year_released'))
-		rating = UserDataCheck.check_rating(data.get('rating'), available_selections['ratings'])
-		duration = UserDataCheck.check_duration(data.get('duration'))
-		genre = UserDataCheck.check_word(data.get('genre'))
+		title = UserDataCheck.check_title(data['title'])
+		year_released = UserDataCheck.check_year(data['year_released'])
+		rating = UserDataCheck.check_rating(data['rating'], available_selections)
+		duration = UserDataCheck.check_duration(data['duration'])
+		genre = UserDataCheck.check_word(data['genre'])
 		return {'title': title, 'year_released': year_released, 'rating': rating, 'duration': duration, 'genre': genre}
 	

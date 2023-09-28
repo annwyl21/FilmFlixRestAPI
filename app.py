@@ -21,35 +21,15 @@ formatted_time = current_time.strftime('%Y-%m-%d %H:%M')
 app = Flask(__name__)
 CORS(app)
 
-available_selections = {}
-
-@app.route('/api/films', methods=['GET'])
-def api_get_films():
-	dbcon = sql.connect("filmflix.db")
+DATABASE = "filmflix.db"
+def query_db(query, args=(), one=False):
+	dbcon = sql.connect(DATABASE)
 	dbCursor = dbcon.cursor()
-
-	try:
-		dbCursor.execute('SELECT * FROM tblfilms')
-		rows = dbCursor.fetchall()
-			
-		film_collection = []
-		# convert row objects to dictionary
-		for film_data_tuple in rows:
-			#print(film_data_tuple)
-			film = {}
-			film['id'] = film_data_tuple[0]
-			film['title'] = film_data_tuple[1]
-			film['year_released'] = film_data_tuple[2]
-			film['rating'] = film_data_tuple[3]
-			film['duration'] = film_data_tuple[4]
-			film['genre'] = film_data_tuple[5]
-			film_collection.append(film)
-		
-		return jsonify(film_collection)
-	
-	except sql.DatabaseError as e:
-		logger.error("GET FILM FAILED: Database Error")
-		return jsonify({'error': 'Database Error'})
+	dbCursor.execute(query, args) # args helps prevent SQLinjection
+	results = dbCursor.fetchall() # setting one to True will return only the first result, making single returns easier to handle
+	dbCursor.close()
+	dbcon.close()
+	return (results[0] if results else None) if one else results
 
 @app.route('/api/get_available_ratings')
 def api_get_available_ratings():
@@ -95,6 +75,35 @@ def api_get_available_genres():
 		logger.error("GET Genre FAILED: Database Error")
 		return jsonify({'error': 'Database Error'})
 
+@app.route('/api/films', methods=['GET'])
+def api_get_films():
+	# dbcon = sql.connect("filmflix.db")
+	# dbCursor = dbcon.cursor()
+
+	try:
+		# dbCursor.execute('SELECT * FROM tblfilms')
+		# rows = dbCursor.fetchall()
+		rows = query_db('SELECT * FROM tblfilms')
+			
+		film_collection = []
+		# convert row objects to dictionary
+		for film_data_tuple in rows:
+			#print(film_data_tuple)
+			film = {}
+			film['id'] = film_data_tuple[0]
+			film['title'] = film_data_tuple[1]
+			film['year_released'] = film_data_tuple[2]
+			film['rating'] = film_data_tuple[3]
+			film['duration'] = film_data_tuple[4]
+			film['genre'] = film_data_tuple[5]
+			film_collection.append(film)
+		
+		return jsonify(film_collection)
+	
+	except sql.DatabaseError as e:
+		logger.error("GET FILM FAILED: Database Error")
+		return jsonify({'error': 'Database Error'})
+
 @app.route('/api/check', methods=['POST'])
 def api_check_film():
 	if request.method == 'POST':
@@ -125,15 +134,28 @@ def api_check_film():
 def api_add_film():
 	if request.method == 'POST':
 		data = request.json
-		film_data = UserDataCheck.check_data_to_add(data, available_selections)
 		
-		dbcon = sql.connect("filmflix.db")
-		dbCursor = dbcon.cursor()
-		dbCursor.execute("INSERT INTO tblfilms(title, yearReleased, rating, duration, genre) VALUES(?, ?, ?, ?, ?)", (film_data['title'], film_data['year_released'], film_data['rating'], film_data['duration'], film_data['genre']))
-		dbcon.commit()
+		film_data = UserDataCheck.check_data_to_add(data, available_selections)
+		print(film_data)
+		if 'error' in film_data.values():
+			logger.error(f"ADD Film FAILED: Data Entry Error {film_data}")
+			return jsonify({'error': 'Data Entry Error'})
+		
+		else:
 
-		logger.info(f"Film Added Successfully: Title {film_data['title']}")
-		return jsonify(film_data)
+			dbcon = sql.connect("filmflix.db")
+			dbCursor = dbcon.cursor()
+
+			try:
+				dbCursor.execute("INSERT INTO tblfilms(title, yearReleased, rating, duration, genre) VALUES(?, ?, ?, ?, ?)", (film_data['title'], film_data['year_released'], film_data['rating'], film_data['duration'], film_data['genre']))
+				dbcon.commit()
+
+				logger.info(f"Film Added Successfully: Title {film_data['title']}")
+				return jsonify(film_data)
+			
+			except sql.DatabaseError as e:
+				logger.error("ADD Film FAILED: Database Error")
+				return jsonify({'error': 'Database Error'})
 
 @app.route('/api/remove/<user_entry>', methods=['DELETE'])
 def api_remove_film(user_entry):
