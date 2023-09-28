@@ -22,6 +22,7 @@ app = Flask(__name__)
 CORS(app)
 
 DATABASE = "filmflix.db"
+#query & commit function to create clean code
 def query_db(query, args=(), one=False):
 	dbcon = sql.connect(DATABASE)
 	dbCursor = dbcon.cursor()
@@ -30,6 +31,14 @@ def query_db(query, args=(), one=False):
 	dbCursor.close()
 	dbcon.close()
 	return (results[0] if results else None) if one else results
+
+def modify_db(statement, args=()):
+	dbcon = sql.connect(DATABASE)
+	dbCursor = dbcon.cursor()
+	dbCursor.execute(statement, args)
+	dbcon.commit()
+	dbCursor.close()
+	dbcon.close()
 
 # globally available genres and ratings lists to help standardisation
 available_ratings = []
@@ -54,11 +63,13 @@ def api_get_films():
 		
 		distinct_genres = query_db('SELECT distinct(genre) FROM tblfilms order by genre asc')
 		for genre in distinct_genres:
-			available_genres.append(genre[0])
+			if genre[0] not in available_genres:
+				available_genres.append(genre[0])
 
 		distinct_ratings = query_db('SELECT distinct(rating) FROM tblfilms')
 		for rating in distinct_ratings:
-			available_ratings.append(rating[0])
+			if rating[0] not in available_ratings:
+				available_ratings.append(rating[0])
 		
 		data = {'film_collection': film_collection, 'distinct_genres': available_genres, 'distinct_ratings': available_ratings}
 		
@@ -106,12 +117,13 @@ def api_add_film():
 		
 		else:
 
-			dbcon = sql.connect("filmflix.db")
-			dbCursor = dbcon.cursor()
+			# dbcon = sql.connect("filmflix.db")
+			# dbCursor = dbcon.cursor()
 
 			try:
-				dbCursor.execute("INSERT INTO tblfilms(title, yearReleased, rating, duration, genre) VALUES(?, ?, ?, ?, ?)", (film_data['title'], film_data['year_released'], film_data['rating'], film_data['duration'], film_data['genre']))
-				dbcon.commit()
+				modify_db("INSERT INTO tblfilms(title, yearReleased, rating, duration, genre) VALUES(?, ?, ?, ?, ?)", (film_data['title'], film_data['year_released'], film_data['rating'], film_data['duration'], film_data['genre']))
+				# dbCursor.execute("INSERT INTO tblfilms(title, yearReleased, rating, duration, genre) VALUES(?, ?, ?, ?, ?)", (film_data['title'], film_data['year_released'], film_data['rating'], film_data['duration'], film_data['genre']))
+				# dbcon.commit()
 
 				logger.info(f"Film Added Successfully: Title {film_data['title']}")
 				return jsonify(film_data)

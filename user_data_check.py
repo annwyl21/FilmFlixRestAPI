@@ -54,7 +54,6 @@ class UserDataCheck:
 		
 	@staticmethod
 	def check_rating(rating, available_ratings):
-		print(rating, available_ratings)
 		rating = rating.upper()
 		# list contains standardised ratings used in the database
 		if rating in available_ratings:
