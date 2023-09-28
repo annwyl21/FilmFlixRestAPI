@@ -31,6 +31,8 @@ def query_db(query, args=(), one=False):
 	dbcon.close()
 	return (results[0] if results else None) if one else results
 
+available_selections = {} # dictionary to store genre and ratings info as a global variable
+
 @app.route('/api/get_available_ratings')
 def api_get_available_ratings():
 	#get list of standardised ratings
@@ -77,18 +79,12 @@ def api_get_available_genres():
 
 @app.route('/api/films', methods=['GET'])
 def api_get_films():
-	# dbcon = sql.connect("filmflix.db")
-	# dbCursor = dbcon.cursor()
-
 	try:
-		# dbCursor.execute('SELECT * FROM tblfilms')
-		# rows = dbCursor.fetchall()
 		rows = query_db('SELECT * FROM tblfilms')
-			
+					
 		film_collection = []
 		# convert row objects to dictionary
 		for film_data_tuple in rows:
-			#print(film_data_tuple)
 			film = {}
 			film['id'] = film_data_tuple[0]
 			film['title'] = film_data_tuple[1]
@@ -98,7 +94,20 @@ def api_get_films():
 			film['genre'] = film_data_tuple[5]
 			film_collection.append(film)
 		
-		return jsonify(film_collection)
+		distinct_genres = query_db('SELECT distinct(genre) FROM tblfilms order by genre asc')
+		available_genres = []
+		for genre in distinct_genres:
+			available_genres.append(genre[0])
+
+		distinct_ratings = query_db('SELECT distinct(rating) FROM tblfilms')
+		available_ratings = []
+		for rating in distinct_ratings:
+			available_ratings.append(rating[0])
+		
+		data = {'film_collection': film_collection, 'distinct_genres': available_genres, 'distinct_ratings': available_ratings}
+		
+		print(available_genres)
+		return jsonify(data)
 	
 	except sql.DatabaseError as e:
 		logger.error("GET FILM FAILED: Database Error")
