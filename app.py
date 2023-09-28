@@ -117,13 +117,8 @@ def api_add_film():
 		
 		else:
 
-			# dbcon = sql.connect("filmflix.db")
-			# dbCursor = dbcon.cursor()
-
 			try:
 				modify_db("INSERT INTO tblfilms(title, yearReleased, rating, duration, genre) VALUES(?, ?, ?, ?, ?)", (film_data['title'], film_data['year_released'], film_data['rating'], film_data['duration'], film_data['genre']))
-				# dbCursor.execute("INSERT INTO tblfilms(title, yearReleased, rating, duration, genre) VALUES(?, ?, ?, ?, ?)", (film_data['title'], film_data['year_released'], film_data['rating'], film_data['duration'], film_data['genre']))
-				# dbcon.commit()
 
 				logger.info(f"Film Added Successfully: Title {film_data['title']}")
 				return jsonify(film_data)
@@ -135,23 +130,17 @@ def api_add_film():
 @app.route('/api/remove/<user_entry>', methods=['DELETE'])
 def api_remove_film(user_entry):
 	if request.method == 'DELETE':
-		dbcon = sql.connect("filmflix.db")
-		dbCursor = dbcon.cursor()
-
 		film_id = UserDataCheck.check_film_id(user_entry)
 		if film_id == 'error':
 			logger.warning(f"User Input Error: {user_entry}")
 			return jsonify({'error': f'Film ID {user_entry} invalid, See Warning Log {formatted_time}'})
 		
 		else:
-			dbCursor.execute(f"SELECT * FROM tblfilms WHERE filmID = {film_id}")
-			film_result = dbCursor.fetchone()
+			film_result = query_db("SELECT * FROM tblfilms WHERE filmID = ?", args=(film_id,))
 
 			if film_result:
-
 				try:
-					dbCursor.execute(f"DELETE FROM tblfilms where filmID = {film_id}")
-					dbcon.commit()
+					modify_db("DELETE FROM tblfilms where filmID = ?", args=(film_id,))
 					logger.info(f'Film Deleted Successfully: Film ID {film_id}')
 					return jsonify({'removed': f"{film_id} {formatted_time}"})
 				
@@ -181,4 +170,4 @@ def api_amend_film():
 		return jsonify(update)
 
 if __name__ == '__main__':
-	app.run()
+	app.run(debug=True)
