@@ -8,7 +8,7 @@ from user_data_check import UserDataCheck
 	("<h1>hello</h1>", "error") # markup insertion
 ])
 def test_check_SQLinjection(SQLinjection, answer):
-	results = UserDataCheck.check_rating(SQLinjection, ['G', 'PG', '12A', '15', 'R'])
+	results = UserDataCheck.check_rating(SQLinjection, ['PG', 'R', 'G', '15', '12'])
 	assert results == answer, f"rating check failed SQLinjection"
 	results = UserDataCheck.check_duration(SQLinjection)
 	assert results == answer, f"duration check failed SQLinjection"
@@ -99,17 +99,21 @@ def test_check_duration_unacceptable(duration, answer):
 
 # RATING field tests
 @pytest.mark.parametrize("rating, answer", [
-	("12a", "12A"), #String acceptable
+	("12", "12"), #String acceptable
 ])
 def test_check_rating_acceptable(rating, answer):
-	results = UserDataCheck.check_rating(rating, ['G', 'PG', '12A', '15', 'R'])
+	results = UserDataCheck.check_rating(rating, ['PG', 'R', 'G', '15', '12'])
 	assert results == answer, f"rating check failed {rating}, {results}"
 
 @pytest.mark.parametrize("rating, answer", [
 	("18", "error"), # 18 is not an accepted rating
+	("12a", "error"),
+	("12A", "error"),
+	("13", 'error'),
+	("21", "error"),
 ])
 def test_check_rating_unacceptable(rating, answer):
-	results = UserDataCheck.check_rating(rating, ['G', 'PG', '12A', '15', 'R'])
+	results = UserDataCheck.check_rating(rating, ['PG', 'R', 'G', '15', '12'])
 	assert results == answer, f"rating check failed {rating}, {results}"
 
 

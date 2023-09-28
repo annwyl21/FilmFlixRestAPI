@@ -31,51 +31,9 @@ def query_db(query, args=(), one=False):
 	dbcon.close()
 	return (results[0] if results else None) if one else results
 
-available_selections = {} # dictionary to store genre and ratings info as a global variable
-
-@app.route('/api/get_available_ratings')
-def api_get_available_ratings():
-	#get list of standardised ratings
-	dbcon = sql.connect("filmflix.db")
-	dbCursor = dbcon.cursor()
-
-	try:
-		dbCursor.execute('SELECT distinct(rating) FROM tblfilms')
-		standard_ratings = dbCursor.fetchall()
-					
-		ratings_list = []
-		# convert row objects to dictionary
-		for rating in standard_ratings:
-			ratings_list.append(rating)
-		available_selections['ratings'] = ratings_list
-		
-		return jsonify(available_selections)
-	
-	except sql.DatabaseError as e:
-		logger.error("GET Ratings FAILED: Database Error")
-		return jsonify({'error': 'Database Error'})
-
-@app.route('/api/get_available_genres')
-def api_get_available_genres():
-	#get list of standardised genres
-	dbcon = sql.connect("filmflix.db")
-	dbCursor = dbcon.cursor()
-
-	try:
-		dbCursor.execute('SELECT distinct(genre) FROM tblfilms order by genre asc')
-		standard_genres = dbCursor.fetchall()
-					
-		genres_list = []
-		# convert row objects to dictionary
-		for genre in standard_genres:
-			genres_list.append(genre)
-		available_selections['genres'] = genres_list
-		
-		return jsonify(available_selections)
-	
-	except sql.DatabaseError as e:
-		logger.error("GET Genre FAILED: Database Error")
-		return jsonify({'error': 'Database Error'})
+# globally available genres and ratings lists to help standardisation
+available_ratings = []
+available_genres = []
 
 @app.route('/api/films', methods=['GET'])
 def api_get_films():
@@ -95,18 +53,15 @@ def api_get_films():
 			film_collection.append(film)
 		
 		distinct_genres = query_db('SELECT distinct(genre) FROM tblfilms order by genre asc')
-		available_genres = []
 		for genre in distinct_genres:
 			available_genres.append(genre[0])
 
 		distinct_ratings = query_db('SELECT distinct(rating) FROM tblfilms')
-		available_ratings = []
 		for rating in distinct_ratings:
 			available_ratings.append(rating[0])
 		
 		data = {'film_collection': film_collection, 'distinct_genres': available_genres, 'distinct_ratings': available_ratings}
 		
-		print(available_genres)
 		return jsonify(data)
 	
 	except sql.DatabaseError as e:
@@ -144,8 +99,7 @@ def api_add_film():
 	if request.method == 'POST':
 		data = request.json
 		
-		film_data = UserDataCheck.check_data_to_add(data, available_selections)
-		print(film_data)
+		film_data = UserDataCheck.check_data_to_add(data, available_ratings)
 		if 'error' in film_data.values():
 			logger.error(f"ADD Film FAILED: Data Entry Error {film_data}")
 			return jsonify({'error': 'Data Entry Error'})

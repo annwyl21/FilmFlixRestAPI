@@ -64,10 +64,10 @@ class UserDataCheck:
 
 		
 	@staticmethod
-	def check_data_to_add(data, available_selections):
+	def check_data_to_add(data, available_ratings):
 		title = UserDataCheck.check_title(data['title'])
 		year_released = UserDataCheck.check_year(data['year_released'])
-		rating = UserDataCheck.check_rating(data['rating'], available_selections)
+		rating = UserDataCheck.check_rating(data['rating'], available_ratings)
 		duration = UserDataCheck.check_duration(data['duration'])
 		genre = UserDataCheck.check_word(data['genre'])
 		return {'title': title, 'year_released': year_released, 'rating': rating, 'duration': duration, 'genre': genre}
