@@ -91,11 +91,12 @@ def api_check_film():
 			return jsonify({'error': f'Word Invalid, Warning Logged {formatted_time}'})
 		
 		else:
+			try:
+				all_records = query_db("SELECT * FROM tblfilms WHERE title LIKE ?", args=('%' + title_to_check + '%',))
+			except sql.DatabaseError as e:
+				logger.error("CHECK Film FAILED: Database Error")
+				return jsonify({'error': 'Database Error'})
 
-			dbcon = sql.connect("filmflix.db")
-			dbCursor = dbcon.cursor()
-			dbCursor.execute(f"SELECT * FROM tblfilms WHERE title LIKE '%{title_to_check.lower()}%'")
-			all_records = dbCursor.fetchall()
 			if not all_records:
 				logger.info(f'Film Search: Title not found')
 				return jsonify({'not found': 'Title not found in database'})
@@ -103,7 +104,6 @@ def api_check_film():
 				for film in all_records:
 					logger.info(f'Film Search: Title found')
 					return jsonify({'film found': film})
-
 
 @app.route('/api/add', methods=['POST'])
 def api_add_film():
