@@ -21,6 +21,8 @@ formatted_time = current_time.strftime('%Y-%m-%d %H:%M')
 app = Flask(__name__)
 CORS(app)
 
+available_selections = {}
+
 @app.route('/api/films', methods=['GET'])
 def api_get_films():
 	dbcon = sql.connect("filmflix.db")
@@ -49,9 +51,9 @@ def api_get_films():
 		logger.error("GET FILM FAILED: Database Error")
 		return jsonify({'error': 'Database Error'})
 
-@app.route('/api/get_selections')
-def api_get_selections():
-	#get list of standardised ratings & genres
+@app.route('/api/get_available_ratings')
+def api_get_available_ratings():
+	#get list of standardised ratings
 	dbcon = sql.connect("filmflix.db")
 	dbCursor = dbcon.cursor()
 
@@ -63,20 +65,35 @@ def api_get_selections():
 		# convert row objects to dictionary
 		for rating in standard_ratings:
 			ratings_list.append(rating)
-		global available_ratings
-		available_ratings = {}
-		available_ratings['ratings'] = ratings_list
+		available_selections['ratings'] = ratings_list
 		
-		return jsonify(available_ratings)
+		return jsonify(available_selections)
 	
 	except sql.DatabaseError as e:
-		logger.error("DELETE FAILED: Database Error on DELETE attempt")
+		logger.error("GET Ratings FAILED: Database Error")
 		return jsonify({'error': 'Database Error'})
 
-@app.route('api/get_genre')
-def api_get_genre():
-	#get list of genres
-	pass
+@app.route('/api/get_available_genres')
+def api_get_available_genres():
+	#get list of standardised genres
+	dbcon = sql.connect("filmflix.db")
+	dbCursor = dbcon.cursor()
+
+	try:
+		dbCursor.execute('SELECT distinct(genre) FROM tblfilms order by genre asc')
+		standard_genres = dbCursor.fetchall()
+					
+		genres_list = []
+		# convert row objects to dictionary
+		for genre in standard_genres:
+			genres_list.append(genre)
+		available_selections['genres'] = genres_list
+		
+		return jsonify(available_selections)
+	
+	except sql.DatabaseError as e:
+		logger.error("GET Genre FAILED: Database Error")
+		return jsonify({'error': 'Database Error'})
 
 @app.route('/api/check', methods=['POST'])
 def api_check_film():
@@ -108,13 +125,7 @@ def api_check_film():
 def api_add_film():
 	if request.method == 'POST':
 		data = request.json
-		film_data = UserDataCheck.check_data_to_add(data, available_ratings)
-		# title = data.get('title')
-		# year_released = data.get('year_released')
-		# rating = data.get('rating')
-		# duration = data.get('duration')
-		# genre = data.get('genre')
-		# film_data = {'title': title, 'year_released': year_released, 'rating': rating, 'duration': duration, 'genre': genre}
+		film_data = UserDataCheck.check_data_to_add(data, available_selections)
 		
 		dbcon = sql.connect("filmflix.db")
 		dbCursor = dbcon.cursor()

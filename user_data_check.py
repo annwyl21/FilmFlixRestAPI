@@ -14,7 +14,8 @@ class UserDataCheck:
 	
 	@staticmethod
 	def check_word(word):
-		#check word only contains letters or numbers and no punctuation
+		word = word.lower()
+		#check word/ genre single word only contains letters or numbers and no punctuation or spaces
 		if word.isalnum():
 			return word
 		else:
@@ -53,24 +54,20 @@ class UserDataCheck:
 		
 	@staticmethod
 	def check_rating(rating, available_ratings):
-		try:
-			rating = rating.upper()
-			# list contains standardised ratings used in the database
-			if rating in available_ratings:
-				return rating
-			else:
-				return 'error'
-		except ValueError as e:
+		rating = rating.upper()
+		# list contains standardised ratings used in the database
+		if rating in available_ratings:
+			return rating
+		else:
 			return 'error'
 
-	# check genre
 		
 	@staticmethod
-	def check_data_to_add(data, available_ratings):
-		title = UserDataCheck.check_word(data.get('title'))
+	def check_data_to_add(data, available_selections):
+		title = UserDataCheck.check_title(data.get('title'))
 		year_released = UserDataCheck.check_year(data.get('year_released'))
-		rating = UserDataCheck.check_rating(data.get('rating'), available_ratings)
+		rating = UserDataCheck.check_rating(data.get('rating'), available_selections['ratings'])
 		duration = UserDataCheck.check_duration(data.get('duration'))
-		genre = data.get('genre')
+		genre = UserDataCheck.check_word(data.get('genre'))
 		return {'title': title, 'year_released': year_released, 'rating': rating, 'duration': duration, 'genre': genre}
 	

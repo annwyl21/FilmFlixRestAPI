@@ -15,7 +15,7 @@ I further extended this project by building 2 example clients; a jupyter noteboo
 
 3. Logging
 
-4. Testing Pytest
+4. Testing Pytest - more than 20 unit tests in pytest using parametrize to test multiple data entry possibilities, including code injections (because this is #3 on OWASP Top 10)
 
 5. CI/CD GitHub Actions
 	

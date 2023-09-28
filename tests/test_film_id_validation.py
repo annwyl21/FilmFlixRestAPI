@@ -111,3 +111,5 @@ def test_check_rating_acceptable(rating, answer):
 def test_check_rating_unacceptable(rating, answer):
 	results = UserDataCheck.check_rating(rating, ['G', 'PG', '12A', '15', 'R'])
 	assert results == answer, f"rating check failed {rating}, {results}"
+
+
