@@ -20,10 +20,6 @@ def test_film_id(film_id, answer):
 @pytest.mark.parametrize("word, answer", [
 	("pet", "pet"), #String acceptable and can be used in database
 	# The following all contain punctuation
-	("break;", "error"), # code injection
-	("; DROP DATABASE; --", "error"), #SQL injection
-	(" OR 1=1 --", "error"), # SQL injection
-	("<h1>hello</h1>", "error") # markup insertion
 ])
 def test_word_check(word, answer):
 	results = UserDataCheck.check_word(word)
@@ -33,9 +29,6 @@ def test_word_check(word, answer):
 	("The Lost City", "The Lost City"), #String acceptable and can be used in database
 	# The following all contain punctuation
 	("Independence Day: Resurgence", "Independence Day: Resurgence"), # accept colon as part of title - edge case
-	("; DROP DATABASE; --", "error"), #SQL injection
-	(" OR 1=1 --", "error"), # SQL injection
-	("<h1>hello</h1>", "error") # markup insertion
 ])
 def test_check_title(title, answer):
 	results = UserDataCheck.check_title(title)
@@ -46,9 +39,6 @@ def test_check_title(title, answer):
 	# Invalid
 	("1850", "error"), # date too old
 	#("25", 'error') # user must enter century
-	("; DROP DATABASE; --", "error"), #SQL injection
-	(" OR 1=1 --", "error"), # SQL injection
-	("<h1>hello</h1>", "error") # markup insertion
 ])
 def test_check_year(year, answer):
 	results = UserDataCheck.check_year(year)
@@ -60,10 +50,36 @@ def test_check_year(year, answer):
 	("873", "873"), # edge case, longest movie
 	#("1.20")
 	#("1h20m")
-	("; DROP DATABASE; --", "error"), #SQL injection
-	(" OR 1=1 --", "error"), # SQL injection
-	("<h1>hello</h1>", "error") # markup insertion
 ])
 def test_check_duration(duration, answer):
 	results = UserDataCheck.check_duration(duration)
 	assert results == answer, f"duration check failed {duration}, {results}"
+
+@pytest.mark.parametrize("rating, answer", [
+	("12a", "12A"), #String acceptable
+	# Invalid Entries
+	("18", "error"), # edge case, longest movie
+])
+def test_check_rating(rating, answer):
+	results = UserDataCheck.check_rating(rating, ['G', 'PG', '12A', '15', 'R'])
+	assert results == answer, f"rating check failed {rating}, {results}"
+
+@pytest.mark.parametrize("SQLinjection, answer", [
+	("; DROP DATABASE; --", "error"), #SQL injection
+	(" OR 1=1 --", "error"), # SQL injection
+	("<h1>hello</h1>", "error") # markup insertion
+])
+def test_check_SQLinjection(SQLinjection, answer):
+	results = UserDataCheck.check_rating(SQLinjection, ['G', 'PG', '12A', '15', 'R'])
+	assert results == answer, f"rating check failed SQLinjection"
+	results = UserDataCheck.check_duration(SQLinjection)
+	assert results == answer, f"duration check failed SQLinjection"
+	results = UserDataCheck.check_year(SQLinjection)
+	assert results == answer, f"year check failed SQLinjection"
+	results = UserDataCheck.check_title(SQLinjection)
+	assert results == answer, f"title check failed SQLinjection"
+	results = UserDataCheck.check_film_id(SQLinjection)
+	assert results == answer, f"film_id check failed SQLinjection"
+	results = UserDataCheck.check_word(SQLinjection)
+	assert results == answer, f"word check failed SQLinjection"
+	

@@ -46,8 +46,37 @@ def api_get_films():
 		return jsonify(film_collection)
 	
 	except sql.DatabaseError as e:
+		logger.error("GET FILM FAILED: Database Error")
+		return jsonify({'error': 'Database Error'})
+
+@app.route('/api/get_selections')
+def api_get_selections():
+	#get list of standardised ratings & genres
+	dbcon = sql.connect("filmflix.db")
+	dbCursor = dbcon.cursor()
+
+	try:
+		dbCursor.execute('SELECT distinct(rating) FROM tblfilms')
+		standard_ratings = dbCursor.fetchall()
+					
+		ratings_list = []
+		# convert row objects to dictionary
+		for rating in standard_ratings:
+			ratings_list.append(rating)
+		global available_ratings
+		available_ratings = {}
+		available_ratings['ratings'] = ratings_list
+		
+		return jsonify(available_ratings)
+	
+	except sql.DatabaseError as e:
 		logger.error("DELETE FAILED: Database Error on DELETE attempt")
 		return jsonify({'error': 'Database Error'})
+
+@app.route('api/get_genre')
+def api_get_genre():
+	#get list of genres
+	pass
 
 @app.route('/api/check', methods=['POST'])
 def api_check_film():
@@ -79,7 +108,7 @@ def api_check_film():
 def api_add_film():
 	if request.method == 'POST':
 		data = request.json
-		film_data = UserDataCheck.check_data_to_add(data)
+		film_data = UserDataCheck.check_data_to_add(data, available_ratings)
 		# title = data.get('title')
 		# year_released = data.get('year_released')
 		# rating = data.get('rating')

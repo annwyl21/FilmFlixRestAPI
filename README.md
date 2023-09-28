@@ -30,3 +30,15 @@ My more robust python command line app can be found on replit:
 - can handle user-input mistakes
 - has a logging output which logs when CRUD operations are performed
 - string formatting for command line results
+
+**Data Integrity Considerations for the Database:**
+
+1. **Rating Field**:
+    - The categorisation of the 'rating' field has been standardized based on a predefined list from the database: [G, PG, 12A, 15, R].
+    - Measures have been implemented to ensure consistency by restricting user input to the aforementioned standardized list.
+
+2. **Genre Field**:
+    - The 'genre' field is designed with adaptability in mind. An initial list of genres is presented to users as a guideline.
+    - Users have the liberty to introduce new genres. Any addition of new genres triggers a logging mechanism, serving as an added layer of data integrity verification.
+
+I would engage in a collaborative discussion with the client to ascertain tailored needs, which would inform strategy for encoding these fields. This document showcases both a rigid and a malleable approach to data handling for these fields.

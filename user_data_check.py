@@ -50,15 +50,26 @@ class UserDataCheck:
 				return 'error'
 		except ValueError as e:
 			return 'error'
+		
+	@staticmethod
+	def check_rating(rating, available_ratings):
+		try:
+			rating = rating.upper()
+			# list contains standardised ratings used in the database
+			if rating in available_ratings:
+				return rating
+			else:
+				return 'error'
+		except ValueError as e:
+			return 'error'
 
-	# check rating
 	# check genre
 		
 	@staticmethod
-	def check_data_to_add(data):
+	def check_data_to_add(data, available_ratings):
 		title = UserDataCheck.check_word(data.get('title'))
 		year_released = UserDataCheck.check_year(data.get('year_released'))
-		rating = data.get('rating')
+		rating = UserDataCheck.check_rating(data.get('rating'), available_ratings)
 		duration = UserDataCheck.check_duration(data.get('duration'))
 		genre = data.get('genre')
 		return {'title': title, 'year_released': year_released, 'rating': rating, 'duration': duration, 'genre': genre}
