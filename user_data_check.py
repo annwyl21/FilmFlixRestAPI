@@ -44,7 +44,7 @@ class UserDataCheck:
 	@staticmethod
 	def check_duration(duration):
 		try:
-			if int(duration) > 1 and int(duration) < 874:
+			if int(duration) >= 1 and int(duration) < 874:
 				return duration
 			else:
 				return 'error'
