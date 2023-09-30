@@ -60,7 +60,16 @@ def api_get_films():
 			film['duration'] = film_data_tuple[4]
 			film['genre'] = film_data_tuple[5]
 			film_collection.append(film)
-		
+				
+		return jsonify(film_collection)
+	
+	except sql.DatabaseError as e:
+		logger.error("GET FILM FAILED: Database Error")
+		return jsonify({'error': 'Database Error'})
+
+@app.route('/api/populate', methods=['POST'])
+def api_populate_CRUD():
+	try:
 		distinct_genres = query_db('SELECT distinct(genre) FROM tblfilms order by genre asc')
 		for genre in distinct_genres:
 			if genre[0] not in available_genres:
@@ -71,12 +80,11 @@ def api_get_films():
 			if rating[0] not in available_ratings:
 				available_ratings.append(rating[0])
 		
-		data = {'film_collection': film_collection, 'distinct_genres': available_genres, 'distinct_ratings': available_ratings}
-		
+		data = {'distinct_genres': available_genres, 'distinct_ratings': available_ratings}
 		return jsonify(data)
 	
 	except sql.DatabaseError as e:
-		logger.error("GET FILM FAILED: Database Error")
+		logger.error("POPULATE FIELD SELECTION FAILED: Database Error")
 		return jsonify({'error': 'Database Error'})
 
 @app.route('/api/check', methods=['POST'])
@@ -170,4 +178,5 @@ def api_amend_film():
 		return jsonify(update)
 
 if __name__ == '__main__':
-	app.run(debug=True)
+	# app.run(debug=True)
+	app.run
