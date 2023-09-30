@@ -92,15 +92,49 @@ def api_check_film():
 	if request.method == 'POST':
 		data = request.json
 		user_entry = data.get('word')
+		if user_entry != 'missing':
+			title_to_check = UserDataCheck.check_word(user_entry)
+		else:
+			title_to_check = None
+		genre = data.get('genre')
+		if genre != 'missing':
+			genre_to_check = UserDataCheck.check_word(genre)
+		else:
+			genre_to_check = None
+		rating = data.get('rating')
+		if rating != 'missing':
+			rating_to_check = UserDataCheck.check_rating(rating)
+		else:
+			rating_to_check = None
 
-		title_to_check = UserDataCheck.check_word(user_entry)
-		if title_to_check == 'error':
+		
+		if title_to_check == 'error' or genre_to_check == 'error' or rating_to_check == 'error':
 			logger.warning(f"User Input Error: {user_entry}")
-			return jsonify({'error': f'Word Invalid, Warning Logged {formatted_time}'})
+			return jsonify({'error': f'Data Entry Invalid, Warning Logged {formatted_time}'})
 		
 		else:
 			try:
-				all_records = query_db("SELECT * FROM tblfilms WHERE title LIKE ?", args=('%' + title_to_check + '%',))
+				if title_to_check and genre_to_check and rating_to_check:
+					all_records = query_db("SELECT * FROM tblfilms WHERE genre = ? and rating = ? and title LIKE ?", args=(genre_to_check, rating_to_check, '%' + title_to_check + '%'))
+				
+				elif title_to_check and genre_to_check:
+					all_records = query_db("SELECT * FROM tblfilms WHERE genre = ? and title LIKE ?", args=(genre_to_check, '%' + title_to_check + '%'))
+				
+				elif genre_to_check and rating_to_check:
+					all_records = query_db("SELECT * FROM tblfilms WHERE genre = ? and rating = ?", args=(genre_to_check, rating_to_check))
+				
+				elif title_to_check and rating_to_check:
+					all_records = query_db("SELECT * FROM tblfilms WHERE rating = ? and title LIKE ?", args=(rating_to_check, '%' + title_to_check + '%'))
+				
+				elif title_to_check:
+					all_records = query_db("SELECT * FROM tblfilms WHERE title LIKE ?", args=('%' + title_to_check + '%',))
+				
+				elif genre_to_check:
+					all_records = query_db("SELECT * FROM tblfilms WHERE genre = ?", args=(genre_to_check,))
+
+				else:
+					all_records = query_db("SELECT * from tblfilms WHERE rating = ?", args=(rating_to_check,))
+
 			except sql.DatabaseError as e:
 				logger.error("CHECK Film FAILED: Database Error")
 				return jsonify({'error': 'Database Error'})
@@ -212,4 +246,4 @@ def api_amend_film():
 
 if __name__ == '__main__':
 	# app.run(debug=True)
-	app.run
+	app.run()
