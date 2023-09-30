@@ -208,7 +208,7 @@ def api_amend_film():
 	
 			except sql.DatabaseError as e:
 				logger.error("UPDATE Film FAILED: Database Error")
-				return jsonify({'error': 'Database Error'})
+				return jsonify({'error': f'Database Error{fieldname}, {fieldvalue}, {film_id}'})
 
 if __name__ == '__main__':
 	# app.run(debug=True)
