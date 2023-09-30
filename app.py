@@ -108,10 +108,20 @@ def api_check_film():
 			if not all_records:
 				logger.info(f'Film Search: Title not found')
 				return jsonify({'not found': 'Title not found in database'})
-			else:
-				for film in all_records:
-					logger.info(f'Film Search: Title found')
-					return jsonify({'film found': film})
+			else:	
+				search_results = []
+			# convert row objects to dictionary
+				for film_data_tuple in all_records:
+					film = {}
+					film['id'] = film_data_tuple[0]
+					film['title'] = film_data_tuple[1]
+					film['year_released'] = film_data_tuple[2]
+					film['rating'] = film_data_tuple[3]
+					film['duration'] = film_data_tuple[4]
+					film['genre'] = film_data_tuple[5]
+					search_results.append(film)
+				
+				return jsonify(search_results)
 
 @app.route('/api/add', methods=['POST'])
 def api_add_film():
