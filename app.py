@@ -201,7 +201,8 @@ def api_amend_film():
 			update = {'Film ID': film_id, 'Field To Update': fieldname, 'Value': fieldvalue}
 
 			try:
-				modify_db("UPDATE tblfilms SET ? = ? WHERE filmid = ?", args=(fieldname, fieldvalue, film_id))
+				sql = "UPDATE tblfilms SET {} = ? WHERE filmid = ?".format(fieldname)
+				modify_db(sql, args=(fieldvalue, film_id))
 				logger.info(f"Record Updated: {film_id} {fieldname} updated to {fieldvalue}")
 				return jsonify(update)
 	
