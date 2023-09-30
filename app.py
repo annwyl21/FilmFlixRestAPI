@@ -175,17 +175,39 @@ def api_remove_film(user_entry):
 def api_amend_film():
 	if request.method == 'PATCH':
 		data = request.json
-		film_id = data.get('film_id')
+
+		film_id = UserDataCheck.check_film_id(data.get('film_id'))
 		fieldname = data.get('fieldname')
 		fieldvalue = data.get('fieldvalue')
-		update = {'Film ID': film_id, 'Field To Update': fieldname, 'Value': fieldvalue}
 
-		dbcon = sql.connect("filmflix.db")
-		dbCursor = dbcon.cursor()
-		dbCursor.execute(f"UPDATE tblfilms SET {fieldname} = '{fieldvalue}' WHERE filmId = {film_id}")
-		dbcon.commit()
-		logger.info(f"Record Updated: {film_id} {fieldname} updated to {fieldvalue}")
-		return jsonify(update)
+		if fieldname == 'title':
+			fieldvalue = UserDataCheck.check_title(fieldvalue)
+		elif fieldname == 'year_released':
+			fieldvalue = UserDataCheck.check_year(fieldvalue)
+		elif fieldname == 'rating':
+			fieldvalue = UserDataCheck.check_rating(fieldvalue)
+		elif fieldname == 'duration':
+			fieldvalue = UserDataCheck.check_duration(fieldvalue)
+		elif fieldname == 'genre':
+			fieldvalue = UserDataCheck.check_word(fieldvalue)
+		else:
+			fieldname = 'error'
+			fieldvalue = 'error'
+
+		if fieldvalue == 'error':
+			logger.error(f"Data Entry Error: {fieldname}, {fieldvalue}")
+			return jsonify({'error': 'Data Entry Error'})
+		else:
+			update = {'Film ID': film_id, 'Field To Update': fieldname, 'Value': fieldvalue}
+
+			try:
+				modify_db("UPDATE tblfilms SET ? = ? WHERE filmid = ?", args=(fieldname, fieldvalue, film_id))
+				logger.info(f"Record Updated: {film_id} {fieldname} updated to {fieldvalue}")
+				return jsonify(update)
+	
+			except sql.DatabaseError as e:
+				logger.error("UPDATE Film FAILED: Database Error")
+				return jsonify({'error': 'Database Error'})
 
 if __name__ == '__main__':
 	# app.run(debug=True)
