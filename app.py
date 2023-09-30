@@ -139,8 +139,21 @@ def api_add_film():
 			try:
 				modify_db("INSERT INTO tblfilms(title, yearReleased, rating, duration, genre) VALUES(?, ?, ?, ?, ?)", (film_data['title'], film_data['year_released'], film_data['rating'], film_data['duration'], film_data['genre']))
 
-				logger.info(f"Film Added Successfully: Title {film_data['title']}")
-				return jsonify(film_data)
+				film_added = query_db("Select * FROM tblfilms ORDER BY filmid desc LIMIT 1")
+				search_results = []
+			# convert row objects to dictionary
+				for film_data_tuple in film_added:
+					film = {}
+					film['id'] = film_data_tuple[0]
+					film['title'] = film_data_tuple[1]
+					film['year_released'] = film_data_tuple[2]
+					film['rating'] = film_data_tuple[3]
+					film['duration'] = film_data_tuple[4]
+					film['genre'] = film_data_tuple[5]
+					search_results.append(film)
+
+				logger.info(f"Film Added: Title {film_data['title']}")
+				return jsonify(search_results)
 			
 			except sql.DatabaseError as e:
 				logger.error("ADD Film FAILED: Database Error")
@@ -161,7 +174,7 @@ def api_remove_film(user_entry):
 				try:
 					modify_db("DELETE FROM tblfilms where filmID = ?", args=(film_id,))
 					logger.info(f'Film Deleted Successfully: Film ID {film_id}')
-					return jsonify({'removed': f"{film_id} {formatted_time}"})
+					return jsonify({'success': f"{film_id} {formatted_time} removed"})
 				
 				except sql.DatabaseError as e:
 					logger.error("DELETE FAILED: Database Error on DELETE attempt")
@@ -204,8 +217,22 @@ def api_amend_film():
 			try:
 				sql = "UPDATE tblfilms SET {} = ? WHERE filmid = ?".format(fieldname)
 				modify_db(sql, args=(fieldvalue, film_id))
+
+				film_updated = query_db("Select * FROM tblfilms WHERE filmid = ?", args=(film_id,))
+				search_results = []
+			# convert row objects to dictionary
+				for film_data_tuple in film_updated:
+					film = {}
+					film['id'] = film_data_tuple[0]
+					film['title'] = film_data_tuple[1]
+					film['year_released'] = film_data_tuple[2]
+					film['rating'] = film_data_tuple[3]
+					film['duration'] = film_data_tuple[4]
+					film['genre'] = film_data_tuple[5]
+					search_results.append(film)
+
 				logger.info(f"Record Updated: {film_id} {fieldname} updated to {fieldvalue}")
-				return jsonify(update)
+				return jsonify(search_results)
 	
 			except sql.DatabaseError as e:
 				logger.error("UPDATE Film FAILED: Database Error")
@@ -214,3 +241,4 @@ def api_amend_film():
 if __name__ == '__main__':
 	# app.run(debug=True)
 	app.run()
+	
