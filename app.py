@@ -67,7 +67,7 @@ def api_get_films():
 		logger.error("GET FILM FAILED: Database Error")
 		return jsonify({'error': 'Database Error'})
 
-@app.route('/api/populate', methods=['POST'])
+@app.route('/api/populate', methods=['GET'])
 def api_populate_CRUD():
 	try:
 		distinct_genres = query_db('SELECT distinct(genre) FROM tblfilms order by genre asc')
