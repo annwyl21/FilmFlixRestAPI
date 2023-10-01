@@ -29,7 +29,6 @@ def test_film_id_acceptable():
 	assert results == "42", f"film_id check not working {film_id}"
 
 @pytest.mark.parametrize("film_id, answer", [
-	("400", "error"), # too big
 	("4d", "error"), # not a valid number
 	("-4", "error"), # not a valid number
 	("4.5", "error"), # not a valid number

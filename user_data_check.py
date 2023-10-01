@@ -46,6 +46,7 @@ class UserDataCheck:
 	def check_duration(duration):
 		try:
 			if int(duration) >= 1 and int(duration) < 874:
+				print(duration, type(duration))
 				return duration
 			else:
 				return 'error'

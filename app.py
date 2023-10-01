@@ -24,21 +24,32 @@ CORS(app)
 DATABASE = "filmflix.db"
 #query & commit function to create clean code
 def query_db(query, args=(), one=False):
-	dbcon = sql.connect(DATABASE)
-	dbCursor = dbcon.cursor()
-	dbCursor.execute(query, args) # args helps prevent SQLinjection
-	results = dbCursor.fetchall() # setting one to True will return only the first result, making single returns easier to handle
-	dbCursor.close()
-	dbcon.close()
-	return (results[0] if results else None) if one else results
+	try:
+		print(query, args)
+		dbcon = sql.connect(DATABASE)
+		dbCursor = dbcon.cursor()
+		dbCursor.execute(query, args) # args helps prevent SQLinjection
+		results = dbCursor.fetchall() # setting one to True will return only the first result, making single returns easier to handle
+		dbCursor.close()
+		dbcon.close()
+		return (results[0] if results else None) if one else results
+	except sql.DatabaseError as e:
+		logger.error("Database Error: DB Read Failed")
+		return 'error'
 
 def modify_db(statement, args=()):
-	dbcon = sql.connect(DATABASE)
-	dbCursor = dbcon.cursor()
-	dbCursor.execute(statement, args)
-	dbcon.commit()
-	dbCursor.close()
-	dbcon.close()
+	try:
+		print(statement, args)
+		dbcon = sql.connect(DATABASE)
+		dbCursor = dbcon.cursor()
+		dbCursor.execute(statement, args)
+		dbcon.commit()
+		dbCursor.close()
+		dbcon.close()
+		return 'success'
+	except sql.DatabaseError as e:
+		logger.error("Database Error: DB Modify Failed")
+		return 'error'
 
 # globally available genres and ratings lists to help standardisation
 available_ratings = []
@@ -46,8 +57,13 @@ available_genres = []
 
 @app.route('/api/films', methods=['GET'])
 def api_get_films():
-	try:
-		rows = query_db('SELECT * FROM tblfilms')
+	
+	rows = query_db('SELECT * FROM tblfilms')
+
+	if 'error' in rows:
+		return jsonify({'error': 'Database Read Error'})
+	
+	else:
 					
 		film_collection = []
 		# convert row objects to dictionary
@@ -62,30 +78,32 @@ def api_get_films():
 			film_collection.append(film)
 				
 		return jsonify(film_collection)
-	
-	except sql.DatabaseError as e:
-		logger.error("GET FILM FAILED: Database Error")
-		return jsonify({'error': 'Database Error'})
 
 @app.route('/api/populate', methods=['GET'])
 def api_populate_CRUD():
-	try:
-		distinct_genres = query_db('SELECT distinct(genre) FROM tblfilms order by genre asc')
+
+	distinct_genres = query_db('SELECT distinct(genre) FROM tblfilms order by genre asc')
+
+	if 'error' in distinct_genres:
+		return jsonify({'error': 'Database Read Error'})
+	
+	else:
 		for genre in distinct_genres:
 			if genre[0] not in available_genres:
 				available_genres.append(genre[0])
 
-		distinct_ratings = query_db('SELECT distinct(rating) FROM tblfilms')
+	distinct_ratings = query_db('SELECT distinct(rating) FROM tblfilms')
+
+	if 'error' in distinct_ratings:
+		return jsonify({'error': 'Database Read Error'})
+	
+	else:
 		for rating in distinct_ratings:
 			if rating[0] not in available_ratings:
 				available_ratings.append(rating[0])
 		
 		data = {'distinct_genres': available_genres, 'distinct_ratings': available_ratings}
 		return jsonify(data)
-	
-	except sql.DatabaseError as e:
-		logger.error("POPULATE FIELD SELECTION FAILED: Database Error")
-		return jsonify({'error': 'Database Error'})
 
 @app.route('/api/check', methods=['POST'])
 def api_check_film():
@@ -98,37 +116,35 @@ def api_check_film():
 			return jsonify({'error': f'Data Entry Invalid, Warning Logged {formatted_time}'})
 		
 		else:
-			try:
-				if title_to_check:
-					all_records = query_db("SELECT * FROM tblfilms WHERE title LIKE ?", args=('%' + title_to_check + '%',))
+			if title_to_check:
+				all_records = query_db("SELECT * FROM tblfilms WHERE title LIKE ?", args=('%' + title_to_check + '%',))
 
-			except sql.DatabaseError as e:
-				logger.error("CHECK Film FAILED: Database Error")
-				return jsonify({'error': 'Database Error'})
-
-			if not all_records:
-				logger.info(f'Film Search: Title not found')
-				return jsonify({'not found': 'Title not found in database'})
-			else:	
-				search_results = []
-			# convert row objects to dictionary
-				for film_data_tuple in all_records:
-					film = {}
-					film['id'] = film_data_tuple[0]
-					film['title'] = film_data_tuple[1]
-					film['year_released'] = film_data_tuple[2]
-					film['rating'] = film_data_tuple[3]
-					film['duration'] = film_data_tuple[4]
-					film['genre'] = film_data_tuple[5]
-					search_results.append(film)
+				if not all_records:
+					logger.info(f'Film Search: Title not found')
+					return jsonify({'not found': 'Title not found in database'})
 				
-				return jsonify(search_results)
+				elif 'error' in all_records:
+					return jsonify({'error': 'Database Read Error'})
+				
+				else:	
+					search_results = []
+				# convert row objects to dictionary
+					for film_data_tuple in all_records:
+						film = {}
+						film['id'] = film_data_tuple[0]
+						film['title'] = film_data_tuple[1]
+						film['year_released'] = film_data_tuple[2]
+						film['rating'] = film_data_tuple[3]
+						film['duration'] = film_data_tuple[4]
+						film['genre'] = film_data_tuple[5]
+						search_results.append(film)
+					
+					return jsonify(search_results)
 
 @app.route('/api/add', methods=['POST'])
 def api_add_film():
 	if request.method == 'POST':
 		data = request.json
-		
 		film_data = UserDataCheck.check_data_to_add(data, available_ratings)
 		
 		if 'error' in film_data.values():
@@ -136,29 +152,32 @@ def api_add_film():
 			return jsonify({'error': 'Data Entry Error'})
 		
 		else:
+			attempt = modify_db("INSERT INTO tblfilms(title, yearReleased, rating, duration, genre) VALUES(?, ?, ?, ?, ?)", (film_data['title'], film_data['year_released'], film_data['rating'], film_data['duration'], film_data['genre']))
 
-			try:
-				modify_db("INSERT INTO tblfilms(title, yearReleased, rating, duration, genre) VALUES(?, ?, ?, ?, ?)", (film_data['title'], film_data['year_released'], film_data['rating'], film_data['duration'], film_data['genre']))
-
-				film_added = query_db("Select * FROM tblfilms ORDER BY filmid desc LIMIT 1")
-				search_results = []
-			# convert row objects to dictionary
-				for film_data_tuple in film_added:
-					film = {}
-					film['id'] = film_data_tuple[0]
-					film['title'] = film_data_tuple[1]
-					film['year_released'] = film_data_tuple[2]
-					film['rating'] = film_data_tuple[3]
-					film['duration'] = film_data_tuple[4]
-					film['genre'] = film_data_tuple[5]
-					search_results.append(film)
-
-				logger.info(f"Film Added: Title {film_data['title']}")
-				return jsonify(search_results)
+			if 'error' in attempt:
+				return jsonify({'error': 'Database Modify Error'})
 			
-			except sql.DatabaseError as e:
-				logger.error("ADD Film FAILED: Database Error")
-				return jsonify({'error': 'Database Error'})
+			else:
+				film_added = query_db("Select * FROM tblfilms ORDER BY filmID desc LIMIT 1")
+
+				if 'error' in film_added:
+					return jsonify({'error': 'Database Read Error'})
+				
+				else:
+					search_results = []
+				# convert row objects to dictionary
+					for film_data_tuple in film_added:
+						film = {}
+						film['id'] = film_data_tuple[0]
+						film['title'] = film_data_tuple[1]
+						film['year_released'] = film_data_tuple[2]
+						film['rating'] = film_data_tuple[3]
+						film['duration'] = film_data_tuple[4]
+						film['genre'] = film_data_tuple[5]
+						search_results.append(film)
+
+					logger.info(f"Film Added: Title {film_data['title']}")
+					return jsonify(search_results)
 
 @app.route('/api/remove/<user_entry>', methods=['DELETE'])
 def api_remove_film(user_entry):
@@ -172,21 +191,17 @@ def api_remove_film(user_entry):
 		else:
 			film_result = query_db("SELECT * FROM tblfilms WHERE filmID = ?", args=(film_id,))
 
-			if film_result:
-				try:
-					modify_db("DELETE FROM tblfilms where filmID = ?", args=(film_id,))
-					logger.info(f'Film Deleted Successfully: Film ID {film_id}')
-					return jsonify({'success': f"{film_id} {formatted_time} removed"})
-				
-				except sql.DatabaseError as e:
-					logger.error("DELETE FAILED: Database Error on DELETE attempt")
-					return jsonify({'error': f'Database Error, See Error Log {formatted_time}'})
-			
-			else:
+			if 'error' in film_result:
+				return jsonify({'error': 'Database Modify Error'})
+			elif not film_result:
 				logger.warning(f"User Input Error: {user_entry}, Failed Attempt to delete film")
 				return jsonify({'error': f'Film ID {film_id} invalid, See Warning Log {formatted_time}'})
-
-
+			
+			else:
+				attempt = modify_db("DELETE FROM tblfilms where filmID = ?", args=(film_id,))
+				logger.info(f'Film Deleted Successfully: Film ID {film_id}')
+				return jsonify({'success': f"{film_id} {formatted_time} removed"})
+				
 @app.route('/api/amend', methods=['PATCH'])
 def api_amend_film():
 	if request.method == 'PATCH':
@@ -198,10 +213,10 @@ def api_amend_film():
 
 		if fieldname == 'title':
 			fieldvalue = UserDataCheck.check_title(fieldvalue)
-		elif fieldname == 'year_released':
+		elif fieldname == 'yearReleased':
 			fieldvalue = UserDataCheck.check_year(fieldvalue)
 		elif fieldname == 'rating':
-			fieldvalue = UserDataCheck.check_rating(fieldvalue)
+			fieldvalue = UserDataCheck.check_rating(fieldvalue, available_ratings)
 		elif fieldname == 'duration':
 			fieldvalue = UserDataCheck.check_duration(fieldvalue)
 		elif fieldname == 'genre':
@@ -209,17 +224,19 @@ def api_amend_film():
 		else:
 			fieldname = 'error'
 			fieldvalue = 'error'
-
+		
 		if fieldvalue == 'error':
 			logger.error(f"Data Entry Error: {fieldname}, {fieldvalue}")
 			return jsonify({'error': 'Data Entry Error'})
+		
 		else:
-			update = {'Film ID': film_id, 'Field To Update': fieldname, 'Value': fieldvalue}
+			sql = "UPDATE tblfilms SET {} = ? WHERE filmid = ?".format(fieldname)
+			attempt = modify_db(sql, args=(fieldvalue, film_id))
 
-			try:
-				sql = "UPDATE tblfilms SET {} = ? WHERE filmid = ?".format(fieldname)
-				modify_db(sql, args=(fieldvalue, film_id))
-
+			if 'error' in attempt:
+				return jsonify({'error': 'Database Modify Error'})
+			
+			else:
 				film_updated = query_db("Select * FROM tblfilms WHERE filmid = ?", args=(film_id,))
 				search_results = []
 			# convert row objects to dictionary
@@ -235,10 +252,6 @@ def api_amend_film():
 
 				logger.info(f"Record Updated: {film_id} {fieldname} updated to {fieldvalue}")
 				return jsonify(search_results)
-	
-			except sql.DatabaseError as e:
-				logger.error("UPDATE Film FAILED: Database Error")
-				return jsonify({'error': f'Database Error{fieldname}, {fieldvalue}, {film_id}'})
 
 if __name__ == '__main__':
 	#app.run(debug=True)
