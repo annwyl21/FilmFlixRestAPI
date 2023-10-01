@@ -17,7 +17,7 @@ class UserDataCheck:
 		word = word.lower()
 		#check word/ genre single word only contains letters or numbers and no punctuation or spaces
 		if word.isalnum():
-			return word
+			return word.title()
 		else:
 			return 'error'
 		
@@ -30,7 +30,7 @@ class UserDataCheck:
 			for letter in word:
 				if not (letter.islower() or letter.isdigit() or letter == ':'):
 					return 'error'
-		return title
+		return title.title()
 	
 	@staticmethod
 	def check_year(year):
