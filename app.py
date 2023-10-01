@@ -130,6 +130,7 @@ def api_add_film():
 		data = request.json
 		
 		film_data = UserDataCheck.check_data_to_add(data, available_ratings)
+		
 		if 'error' in film_data.values():
 			logger.error(f"ADD Film FAILED: Data Entry Error {film_data}")
 			return jsonify({'error': 'Data Entry Error'})
@@ -163,6 +164,7 @@ def api_add_film():
 def api_remove_film(user_entry):
 	if request.method == 'DELETE':
 		film_id = UserDataCheck.check_film_id(user_entry)
+		
 		if film_id == 'error':
 			logger.warning(f"User Input Error: {user_entry}")
 			return jsonify({'error': f'Film ID {user_entry} invalid, See Warning Log {formatted_time}'})
@@ -239,6 +241,6 @@ def api_amend_film():
 				return jsonify({'error': f'Database Error{fieldname}, {fieldvalue}, {film_id}'})
 
 if __name__ == '__main__':
-	# app.run(debug=True)
+	#app.run(debug=True)
 	app.run()
 	
