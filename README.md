@@ -1,9 +1,9 @@
 # RestAPI connecting to a database of films in SQLite
 
 Deployed to Render, my microservice can communicate with any client using **json** via its POST, PATCH, DELETE endpoints.
-- 2 example clients that interact with the database
+- 2 example clients that interact with the RestAPI
     - Web GUI Flask App to perform CRUD operations
-    - Jupyter Notebook to display statistics
+    - Jupyter Notebook to display statistics about the database
 
 # [Jupyter Notebook](https://github.com/annwyl21/FilmFlixRestAPI/blob/main/database_statistics.ipynb)
 
