@@ -47,6 +47,7 @@ def modify_db(statement, args=()):
 		dbCursor.close()
 		dbcon.close()
 		return 'success'
+	# Ephemeral Storage: Application is deployed on a platform where the file system is ephemeral, like many cloud platforms including platforms like Heroku, Render, and others, changes to the filesystem (like SQLite writes) are lost once the instance is restarted. On such platforms, a managed database service, or a persistent storage option needs to be set up but that is likely a paid option.
 	except sql.DatabaseError as e:
 		logger.error("Database Error: DB Modify Failed")
 		return 'error'
