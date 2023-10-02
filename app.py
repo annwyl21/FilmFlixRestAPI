@@ -8,10 +8,11 @@ import sqlite3 as sql # sql lite module
 
 from user_data_check import UserDataCheck
 
-import logging
-LOG_FORMAT = "%(levelname)s %(asctime)s - %(message)s"
-logging.basicConfig(filename = "log_CRUD.log", level=logging.ERROR, format = LOG_FORMAT)
-logger = logging.getLogger()
+# LOGGING WORKS, IT IS JUST TURNED OFF FOR RENDER
+# import logging
+# LOG_FORMAT = "%(levelname)s %(asctime)s - %(message)s"
+# logging.basicConfig(filename = "log_CRUD.log", level=logging.ERROR, format = LOG_FORMAT)
+# logger = logging.getLogger()
 
 current_time = datetime.now()
 formatted_time = current_time.strftime('%Y-%m-%d %H:%M')
@@ -34,7 +35,7 @@ def query_db(query, args=(), one=False):
 		dbcon.close()
 		return (results[0] if results else None) if one else results
 	except sql.DatabaseError as e:
-		logger.error("Database Error: DB Read Failed")
+		# logger.error("Database Error: DB Read Failed")
 		return 'error'
 
 def modify_db(statement, args=()):
@@ -49,7 +50,7 @@ def modify_db(statement, args=()):
 		return 'success'
 	# Ephemeral Storage: Application is deployed on a platform where the file system is ephemeral, like many cloud platforms including platforms like Heroku, Render, and others, changes to the filesystem (like SQLite writes) are lost once the instance is restarted. On such platforms, a managed database service, or a persistent storage option needs to be set up but that is likely a paid option.
 	except sql.DatabaseError as e:
-		logger.error("Database Error: DB Modify Failed")
+		# logger.error("Database Error: DB Modify Failed")
 		return 'error'
 
 # globally available genres and ratings lists to help standardisation
@@ -113,7 +114,7 @@ def api_check_film():
 		user_entry = data.get('word')
 		title_to_check = UserDataCheck.check_word(user_entry)
 		if title_to_check == 'error':
-			logger.warning(f"User Input Error: {user_entry}")
+			# logger.warning(f"User Input Error: {user_entry}")
 			return jsonify({'error': f'Data Entry Invalid, Warning Logged {formatted_time}'})
 		
 		else:
@@ -121,7 +122,7 @@ def api_check_film():
 				all_records = query_db("SELECT * FROM tblfilms WHERE title LIKE ?", args=('%' + title_to_check + '%',))
 
 				if not all_records:
-					logger.info(f'Film Search: Title not found')
+					# logger.info(f'Film Search: Title not found')
 					return jsonify({'not found': 'Title not found in database'})
 				
 				elif 'error' in all_records:
@@ -149,7 +150,7 @@ def api_add_film():
 		film_data = UserDataCheck.check_data_to_add(data, available_ratings)
 		
 		if 'error' in film_data.values():
-			logger.error(f"ADD Film FAILED: Data Entry Error {film_data}")
+			# logger.error(f"ADD Film FAILED: Data Entry Error {film_data}")
 			return jsonify({'error': 'Data Entry Error'})
 		
 		else:
@@ -177,7 +178,7 @@ def api_add_film():
 						film['genre'] = film_data_tuple[5]
 						search_results.append(film)
 
-					logger.info(f"Film Added: Title {film_data['title']}")
+					# logger.info(f"Film Added: Title {film_data['title']}")
 					return jsonify(search_results)
 
 @app.route('/api/remove/<user_entry>', methods=['DELETE'])
@@ -186,7 +187,7 @@ def api_remove_film(user_entry):
 		film_id = UserDataCheck.check_film_id(user_entry)
 		
 		if film_id == 'error':
-			logger.warning(f"User Input Error: {user_entry}")
+			# logger.warning(f"User Input Error: {user_entry}")
 			return jsonify({'error': f'Film ID {user_entry} invalid, See Warning Log {formatted_time}'})
 		
 		else:
@@ -195,12 +196,12 @@ def api_remove_film(user_entry):
 			if 'error' in film_result:
 				return jsonify({'error': 'Database Modify Error'})
 			elif not film_result:
-				logger.warning(f"User Input Error: {user_entry}, Failed Attempt to delete film")
+				# logger.warning(f"User Input Error: {user_entry}, Failed Attempt to delete film")
 				return jsonify({'error': f'Film ID {film_id} invalid, See Warning Log {formatted_time}'})
 			
 			else:
 				attempt = modify_db("DELETE FROM tblfilms where filmID = ?", args=(film_id,))
-				logger.info(f'Film Deleted Successfully: Film ID {film_id}')
+				# logger.info(f'Film Deleted Successfully: Film ID {film_id}')
 				return jsonify({'success': f"{film_id} {formatted_time} removed"})
 				
 @app.route('/api/amend', methods=['PATCH'])
@@ -227,7 +228,7 @@ def api_amend_film():
 			fieldvalue = 'error'
 		
 		if fieldvalue == 'error':
-			logger.error(f"Data Entry Error: {fieldname}, {fieldvalue}")
+			# logger.error(f"Data Entry Error: {fieldname}, {fieldvalue}")
 			return jsonify({'error': 'Data Entry Error'})
 		
 		else:
@@ -251,7 +252,7 @@ def api_amend_film():
 					film['genre'] = film_data_tuple[5]
 					search_results.append(film)
 
-				logger.info(f"Record Updated: {film_id} {fieldname} updated to {fieldvalue}")
+				# logger.info(f"Record Updated: {film_id} {fieldname} updated to {fieldvalue}")
 				return jsonify(search_results)
 
 if __name__ == '__main__':
