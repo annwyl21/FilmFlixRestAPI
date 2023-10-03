@@ -51,6 +51,9 @@ def modify_db(statement, args=()):
 		# logger.error("Database Error: DB Modify Failed")
 		return 'error'
 
+available_genres = []
+available_ratings = []
+
 @app.route('/api/films', methods=['GET'])
 def api_get_films():
 	
