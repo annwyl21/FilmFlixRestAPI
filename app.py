@@ -26,7 +26,6 @@ DATABASE = "filmflix.db"
 #query & commit function to create clean code
 def query_db(query, args=(), one=False):
 	try:
-		print(query, args)
 		dbcon = sql.connect(DATABASE)
 		dbCursor = dbcon.cursor()
 		dbCursor.execute(query, args) # args helps prevent SQLinjection
@@ -40,7 +39,6 @@ def query_db(query, args=(), one=False):
 
 def modify_db(statement, args=()):
 	try:
-		print(statement, args)
 		dbcon = sql.connect(DATABASE)
 		dbCursor = dbcon.cursor()
 		dbCursor.execute(statement, args)
@@ -48,14 +46,10 @@ def modify_db(statement, args=()):
 		dbCursor.close()
 		dbcon.close()
 		return 'success'
-	# Ephemeral Storage: Application is deployed on a platform where the file system is ephemeral, like many cloud platforms including platforms like Heroku, Render, and others, changes to the filesystem (like SQLite writes) are lost once the instance is restarted. On such platforms, a managed database service, or a persistent storage option needs to be set up but that is likely a paid option.
+	# Ephemeral Storage: Application is deployed on a platform where the file system is ephemeral, like many cloud platforms including platforms like Heroku, Render, and others, changes to the filesystem (like SQLite writes) are lost once the instance is restarted. On such platforms, a managed database service, or a persistent storage option needs to be set up but that is a paid option.
 	except sql.DatabaseError as e:
 		# logger.error("Database Error: DB Modify Failed")
 		return 'error'
-
-# globally available genres and ratings lists to help standardisation
-available_ratings = []
-available_genres = []
 
 @app.route('/api/films', methods=['GET'])
 def api_get_films():
@@ -90,9 +84,9 @@ def api_populate_CRUD():
 		return jsonify({'error': 'Database Read Error'})
 	
 	else:
+		available_genres = []
 		for genre in distinct_genres:
-			if genre[0] not in available_genres:
-				available_genres.append(genre[0])
+			available_genres.append(genre[0])
 
 	distinct_ratings = query_db('SELECT distinct(rating) FROM tblfilms')
 
@@ -100,9 +94,9 @@ def api_populate_CRUD():
 		return jsonify({'error': 'Database Read Error'})
 	
 	else:
+		available_ratings = []
 		for rating in distinct_ratings:
-			if rating[0] not in available_ratings:
-				available_ratings.append(rating[0])
+			available_ratings.append(rating[0])
 		
 		data = {'distinct_genres': available_genres, 'distinct_ratings': available_ratings}
 		return jsonify(data)
