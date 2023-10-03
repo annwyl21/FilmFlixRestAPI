@@ -87,9 +87,9 @@ def api_populate_CRUD():
 		return jsonify({'error': 'Database Read Error'})
 	
 	else:
-		available_genres = []
 		for genre in distinct_genres:
-			available_genres.append(genre[0])
+			if genre[0] not in available_genres:
+				available_genres.append(genre[0])
 
 	distinct_ratings = query_db('SELECT distinct(rating) FROM tblfilms')
 
@@ -97,9 +97,9 @@ def api_populate_CRUD():
 		return jsonify({'error': 'Database Read Error'})
 	
 	else:
-		available_ratings = []
 		for rating in distinct_ratings:
-			available_ratings.append(rating[0])
+			if rating[0] not in available_ratings:
+				available_ratings.append(rating[0])
 		
 		data = {'distinct_genres': available_genres, 'distinct_ratings': available_ratings}
 		return jsonify(data)
