@@ -25,3 +25,9 @@ _Render does take a minute to spin up because I use the free service_
     - Validation checks within the RestAPI that runs when data is received as json
     - The validation in the RestAPI is checked with tests that run automatically on pull request, to ensure there is always working code in the RestAPI
     - RestAPI uses parameterized queries to ensure user input is always treated as data and not as executable code
+
+A web sequencing diagram to describe how this API interacts.
+![Web Sequencing Diagram](./sequencediagram.png)
+
+A diagram illustrating the microservice's role in separating the front end's semantic layer from the API's business logic. The green dashed box represents the database and API, which are shown together but would be decoupled in practice.
+![Illustration of Microservice](./microservice.png)
